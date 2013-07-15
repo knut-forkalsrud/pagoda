@@ -56,7 +56,7 @@ module Shwedagon
           elsif value == 'false'
             yaml[key] = false
           else
-            yaml[key] = value
+            yaml[key] = YAML::load(value)
           end
         end
       end
