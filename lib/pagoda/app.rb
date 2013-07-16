@@ -196,7 +196,9 @@ module Shwedagon
         raise 'No file uploaded'
       else
         file = File.join(jekyll_site.source, *%w[img], name)
-        File.open(file, 'wb') { |file| file.write(tmpfile.read)}
+        File.open(file, 'wb') { |f| f.write(tmpfile.read)}
+        repo.add file
+        repo.commit_index "Created image '#{name}'"
         redirect @base_url + '/images'
       end
     end
