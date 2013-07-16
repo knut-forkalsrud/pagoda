@@ -1,14 +1,24 @@
 <body class="admin posts">
   <div id="admin">
-    <ul>
+    <ul style="list-style-type: none;">
       {{#images}}
-        <li><img src="/img/{{.}}"></li>
+        <li><img src="/img/{{.}}" style="max-height: 100px; margin-right: 40px;"> /img/{{.}}</li>
       {{/images}}
     </ul>
 
     <form accept-charset="UTF-8" action="{{base_url}}/images/upload" enctype="multipart/form-data" method="post">
       <input name="file" type="file" />
-      <input type="button" value="Upload" />
+      <input type="submit" value="Upload" />
     </form>
+
+      <div id="publish-bar-hover">
+        <div id="publish-bar">
+          <div class="contain">
+            <div class="left">
+              <a href="{{base_url}}/">&laquo; Admin</a>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
 </body>

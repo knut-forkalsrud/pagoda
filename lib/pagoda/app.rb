@@ -178,8 +178,14 @@ module Shwedagon
       end
     end
 
+    get '/img/*' do
+      image_file = params[:splat].first
+      send_file File.join(jekyll_site.source, *%w[img], image_file)
+    end
+
     get '/images' do
       @images = Dir.entries(File.join(jekyll_site.source, *%w[img]))
+      @images.select! {|i| i.match(/\.(png|jpg|jpeg|gif)/i)}
       mustache :images
     end
 
