@@ -178,5 +178,21 @@ module Shwedagon
       end
     end
 
+    get '/images' do
+      @images = Dir.entries(File.join(jekyll_site.source, *%w[img]))
+      mustache :images
+    end
+
+    post '/images/upload' do
+      unless params[:file] &&
+        (tmpfile = params[:file][:tempfile]) &&
+        (name = params[:file][:filename])
+        raise 'No file uploaded'
+      else
+        file = File.join(jekyll_site.source, *%w[img], name)
+        File.open(file, 'wb') { |file| file.write(tmpfile.read)}
+        redirect @base_url + '/images'
+      end
+    end
   end
 end
