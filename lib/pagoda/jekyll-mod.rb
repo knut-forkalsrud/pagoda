@@ -23,7 +23,7 @@ module Jekyll
         if Draft.valid?(f)
           post = Draft.new(self, self.source, dir, f)
 
-          if (not post.published )
+          if (not post.published? )
             drafts << post
           end
         end
