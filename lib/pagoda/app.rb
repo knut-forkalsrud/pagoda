@@ -180,11 +180,11 @@ module Shwedagon
 
     get '/img/*' do
       image_file = params[:splat].first
-      send_file File.join(jekyll_site.source, *%w[img], image_file)
+      send_file File.join(jekyll_site.source, *%w[images], image_file)
     end
 
     get '/images' do
-      @images = Dir.entries(File.join(jekyll_site.source, *%w[img]))
+      @images = Dir.entries(File.join(jekyll_site.source, *%w[images]))
       @images.select! {|i| i.match(/\.(png|jpg|jpeg|gif)/i)}
       mustache :images
     end
@@ -195,7 +195,7 @@ module Shwedagon
         (name = params[:file][:filename])
         raise 'No file uploaded'
       else
-        file = File.join(jekyll_site.source, *%w[img], name)
+        file = File.join(jekyll_site.source, *%w[images], name)
         File.open(file, 'wb') { |f| f.write(tmpfile.read)}
         repo.add file
         repo.commit_index "Created image '#{name}'"
