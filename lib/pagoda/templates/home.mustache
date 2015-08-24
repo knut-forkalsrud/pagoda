@@ -3,13 +3,13 @@
     <div id="save"></div>
     
     <div id="drafts" class="col">
-      <h1>Drafts <a href="{{base_url}}/new" class="button">New Draft</a></h1>
+      <h1>Utkast <a href="{{base_url}}/new" class="button">Ny Kladd</a></h1>
       <form accept-charset="UTF-8" action="{{base_url}}/new" class="new_post" id="new_post" method="get">
         <input id           = "post-title" 
                name         = "ptitle" 
                autocomplete = "off"
-               placeholder  = "Start typing your title here..." size="30" type="text" />
-      </form>  
+               placeholder  = "Begynn med en overskrift her..." size="30" type="text" />
+      </form>
 
       <ul>
         {{#drafts}}
@@ -17,7 +17,6 @@
           <h3>
             <a href="{{base_url}}/edit/{{filename}}">{{title}}</a>
             <span class="links">
-              <a href="{{base_url}}/404" class="admin-view">view</a>
               <a href="{{base_url}}/delete/{{filename}}" class="delete-button admin-delete" rel="nofollow">x</a>
             </span>
           </h3>
@@ -27,15 +26,14 @@
   </div>
 
   <div id="published" class="col">
-  <h2>Published 
-  <a href="{{base_url}}/settings" class="button">Settings</a></h2>
+  <h2>Publisert 
+  <a href="{{base_url}}/settings" class="button">Instillinger</a></h2>
   <ul>
     {{#published}}
     <li id="post-{{filename}}">
       <h3>
         <a href="{{base_url}}/edit/{{filename}}">{{title}}</a>
         <span class="links">
-          <a href="{{base_url}}/404" class="admin-view">view</a>
           <a href="{{base_url}}/delete/{{filename}}" class="delete-button admin-delete" rel="nofollow">x</a>
         </span>
       </h3>
@@ -47,7 +45,7 @@
         <div id="publish-bar">
           <div class="contain">
             <div class="left">
-              <a href="{{base_url}}/images">Images</a>
+              <a href="{{base_url}}/images">Bilder</a>
             </div>
           </div>
         </div>
