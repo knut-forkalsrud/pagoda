@@ -5,7 +5,10 @@ module Shwedagon
     # Jekyll site instance
     def jekyll_site
       if not @site
-        config  = Jekyll.configuration({'source' => settings.blog})
+        config  = Jekyll.configuration({
+                                         'source' => settings.blog,
+                                         'show_drafts' => true
+                                       })
         @site   = Jekyll::Site.new(config)
         @site.read
       end

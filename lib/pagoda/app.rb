@@ -25,9 +25,10 @@ module Shwedagon
     end
 
     def yaml_data(post_title)
-      defaults = { 'title' => post_title,
-        'layout' => 'post',
-        'published' => false }
+      defaults = {
+        'title' => post_title,
+        'layout' => 'post'
+      }
 
       defaults = defaults.merge(default_yaml())
 
@@ -90,9 +91,9 @@ module Shwedagon
 
     # Index of drafts and published posts
     get '/' do
-      @drafts    = posts_template_data(jekyll_site.read_drafts)
-      @published = posts_template_data(jekyll_site.posts)
-
+      allposts = 
+      @drafts    = posts_template_data(jekyll_site.posts.select{|post| post.instance_of? Jekyll::Draft })
+      @published = posts_template_data(jekyll_site.posts.reject{|post| post.instance_of? Jekyll::Draft })
       mustache :home
     end
 
@@ -155,10 +156,7 @@ module Shwedagon
     end
 
     post '/save-post' do
-      config = Jekyll.configuration({'source' => settings.blog})
-      site   = Jekyll::Site.new(config)
-
-      if params[:method] == 'put'
+      if !params[:file]
         filename = create_new_post(params)        
         log_message = "Created #{filename}"
       else

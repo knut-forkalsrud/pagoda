@@ -1,13 +1,13 @@
 module Jekyll
   class Site
 
-    # Read all the files in <source>/<dir>/_posts and create a new Post
+    # Read all the files in <source>/<dir>/_drafts and create a new Post
     # object only for draft items
     #
     # dir - The String relative path of the directory to read.
     #
     # Returns nothing.
-    def read_drafts(dir = '')
+    def read_drafts2(dir = '')
       if self.respond_to? 'get_entries'
         entries = get_entries(dir, '_drafts')
       else
@@ -22,10 +22,7 @@ module Jekyll
       entries.each do |f|
         if Draft.valid?(f)
           post = Draft.new(self, self.source, dir, f)
-
-          if (not post.published? )
-            drafts << post
-          end
+          drafts << post
         end
       end
 
