@@ -21,7 +21,47 @@ module Shwedagon
   class App < Sinatra::Base
    
     before do
+      @auth ||= Rack::Auth::Basic::Request.new(request.env)
       @base_url = url('/', false).chomp('/')
+    end
+
+    def unauthorized!(realm="pagoda")
+      response.headers['WWW-Authenticate'] = "Basic realm=\"#{realm}\""
+      throw :halt, [ 401, 'Authorization Required' ]
+    end
+
+    def bad_request!
+      throw :halt, [ 400, 'Bad Request' ]
+    end
+
+    def authorized?
+      request.env['REMOTE_USER']
+    end
+
+    def authorize(username, password)
+
+      users = jekyll_site.data['authors']
+
+      # If there are no authors we effectively disable access control
+      return true unless users
+
+      user = users[username]
+
+      # User not found means unauthorized
+      return false unless user
+
+      # Check password
+      pw_hash = Digest::MD5.hexdigest("#{username}:#{password}")
+
+      return user['password'] == pw_hash
+    end
+
+    def require_authorization
+      return if authorized?
+      unauthorized! unless @auth.provided?
+      bad_request! unless @auth.basic?
+      unauthorized! unless authorize(*@auth.credentials)
+      request.env['REMOTE_USER'] = @auth.username
     end
 
     def yaml_data(post_title)
@@ -97,6 +137,11 @@ module Shwedagon
       mustache :home
     end
 
+    get '/login' do
+      require_authorization
+      STDERR.puts "logged in #{@auth.inspect}"
+      STDERR.puts "Users: #{jekyll_site.data['authors'].inspect}"
+    end
 
     #Delete any post. Ideally should be post. For convenience, it is get. 
     get '/delete/*' do
