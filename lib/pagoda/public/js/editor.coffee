@@ -11,12 +11,12 @@ $(document).ready ->
 
   set_save_button = (status)->
     if(status == 'saving')
-      $('#save-button').val('SAVING')
+      $('#save-button').val('Lagrer...')
       $('#save-button').addClass('post-saving')
     else if status == 'saved'
-      $('#save-button').val('SAVED')
+      $('#save-button').val('Lagret')
       setTimeout((->
-        $('#save-button').val('SAVE')
+        $('#save-button').val('Lagre')
         $('#save-button').removeClass('post-saving')
       ), 1000)
     else if status == 'error'
@@ -138,7 +138,7 @@ $(document).ready ->
         $('#post-content').attr('rows', 18);
 
     $('.delete-button').click ->
-      if not confirm("Confirm delete?")
+      if not confirm("Bekreft slett?")
         return false
 
     $('#post-content').bind 'scroll', (e)->
@@ -176,7 +176,6 @@ $(document).ready ->
   show_shortcuts =->
     is_mac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
     special_key = if is_mac then '⌘' else 'ctrl'
-
 
     save_shortcut  = special_key + '+S'
     fulls_shortcut = special_key + '+Enter'
