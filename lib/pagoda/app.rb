@@ -12,7 +12,6 @@ require 'yaml'
 require 'pagoda/views/layout'
 require 'pagoda/helper'
 require 'pagoda/config'
-require 'pagoda/jekyll-mod'
 
 # Sinatra based frontend
 module Shwedagon
@@ -131,9 +130,12 @@ module Shwedagon
 
     # Index of drafts and published posts
     get '/' do
-      allposts = 
-      @drafts    = posts_template_data(jekyll_site.posts.select{|post| post.instance_of? Jekyll::Draft })
-      @published = posts_template_data(jekyll_site.posts.reject{|post| post.instance_of? Jekyll::Draft })
+      allposts = jekyll_site.posts
+      draftFilter = Proc.new do |post|
+        post.instance_of? Jekyll::Draft
+      end
+      @drafts    = posts_template_data(allposts.select &draftFilter)
+      @published = posts_template_data(allposts.reject &draftFilter)
       mustache :home
     end
 
@@ -165,7 +167,7 @@ module Shwedagon
       post     = jekyll_post(post_file) 
       @title   = post.data['title']
       @content = post.content
-      @name    = post.name
+      @name    = post.relative_path[/^\/?(.*)/, 1] # Normalizing. Some Jekyll versions return /_drafts/ for drafts, but _posts/ for posts
 
       @data_array = []
 
