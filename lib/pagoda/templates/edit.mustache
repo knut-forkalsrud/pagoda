@@ -9,7 +9,6 @@
           <div class="contain">
             <div class="left">
               <a href="{{base_url}}/">&laquo; ADMIN</a>
-              {{alagu}}
               <div class="yaml-block">
                 <div class="yaml-table arrow-box">
                   <div class="yaml-table-inner">
@@ -28,12 +27,10 @@
               </div>
             </div>
             <div class="right">
-
-              <div class="draft-options">
-                <a id="draft-action" class="button {{#draft}}selected{{/draft}}" href="#">KLADD</a>
-                <a id="publish-action" class="button {{^draft}}selected{{/draft}}" href="#">PUBLISER</a>
-              </div>
-              <input id="save-button" name="commit" type="submit" value="LAGRE" />
+{{#draft}}
+              <input id="publish-button" name="publish" type="submit" value="PUBLISER" />
+{{/draft}}
+              <input id="save-button"    name="commit"  type="submit" value="LAGRE" />
             </div>
           </div>
         </div>

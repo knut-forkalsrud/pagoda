@@ -74,19 +74,6 @@ module Shwedagon
       defaults
     end
 
-    # Create a new post from scratch. Return filename
-    # This would not commit the file.
-    def create_new_post(params)      
-      post_title = params['post']['title']
-      post_date  = (Time.now).strftime("%Y-%m-%d")
-
-      content    = yaml_data(post_title).to_yaml + "---\n" + params[:post][:content]
-      post_file  = (post_date + " " + post_title).to_url + '.md'
-      file       = File.join(jekyll_site.source, *%w[_drafts], post_file)
-      File.open(file, 'w') { |file| file.write(content)}
-      post_file
-    end
-
     # Merge existing yaml with post params
     def merge_config(yaml, params)
       if params['post'].has_key? 'yaml'
@@ -100,33 +87,25 @@ module Shwedagon
           end
         end
       end
-
+      if params['post'].has_key? 'title'
+        yaml['title'] = params['post']['title']
+      end
       yaml
     end
 
-    def write_post_contents(content, yaml, post_file)
-      writeable_content  = yaml.to_yaml + "---\n" + content
+    # Create a new post from scratch. Return filename
+    # This would not commit the file.
+    def publish_draft(params)      
+      post_title = params['post']['title']
+      post_date  = (Time.now).strftime("%Y-%m-%d")
 
-	  if File.exists? post_path(post_file)
-        file_path          = post_path(post_file)
-      else
-		file_path          = draft_path(post_file)
-	  end
-
-      if File.exists? file_path
-        File.open(file_path, 'w') { |file| file.write(writeable_content)}
-      end
-    end
-
-    # Update exiting post.
-    def update_post(params)
-      post_file   = params[:post][:name]
-      post        = jekyll_post(post_file)
-      yaml_config = merge_config(post.data, params)
-      write_post_contents(params[:post][:content], yaml_config, post_file)
-
+      content    = yaml_data(post_title).to_yaml + "---\n" + params[:post][:content]
+      post_file  = (post_date + " " + post_title).to_url + '.md'
+      file       = File.join(jekyll_site.source, *%w[_drafts], post_file)
+      File.open(file, 'w') { |file| file.write(content)}
       post_file
     end
+
 
     # Index of drafts and published posts
     get '/' do
@@ -175,7 +154,7 @@ module Shwedagon
         @data_array << {'key' => key, 'value' => value}
       end
 
-      if post.data['published'] == false
+      if @name =~ /^\_drafts\//
         @draft = true
       end
 
@@ -184,6 +163,10 @@ module Shwedagon
 
     get '/new' do
       @ptitle = params['ptitle']
+      if !@title
+        redirect @base_url
+      end
+      create_new_post
       mustache :new_post
     end
 
@@ -203,23 +186,72 @@ module Shwedagon
     end
 
     post '/save-post' do
-      if !params[:file]
-        filename = create_new_post(params)        
-        log_message = "Created #{filename}"
-      else
-        filename = update_post(params)
-        log_message = "Changed #{filename}"
+
+      existing_file = params[:post][:name]
+      if existing_file && File.exist?(existing_file)
+        existing_klass = existing_file =~ /^_posts\// ? Jekyll::Post : Jekyll::Draft
+        existing_post = existing_klass.new(jekyll_site, jekyll_site.source, '', File.basename(existing_file))
       end
 
-      # Stage the file for commit
-      repo.add File.join(jekyll_site.source, *%w[_posts], filename)
+      post_title = params['post']['title']
+      if existing_post
+        yaml_config = merge_config(existing_post.data, params)
+      else
+        yaml_config = yaml_data(post_title)
+      end
 
+      # Determine if we're saving a Draft or a Post
+      post_date = nil
+      if existing_file =~ /^_posts\//
+        publish = true
+
+        STDERR.puts "existing file: #{existing_file} to #{File.basename(existing_file)}"
+
+        post_date = existing_post.date
+
+      elsif params[:publish]
+        publish = true
+        post_date = yaml_config['date'] ? yaml_config['date'] : Time.now;
+      else
+        publish = false
+      end
+
+      new_filename = (publish ? post_date.strftime("%Y-%m-%d-") : "") + post_title.to_url + '.md'
+      new_file = File.join(jekyll_site.source, publish ? "_posts" : "_drafts", new_filename)
+
+      writeable_content  = yaml_config.to_yaml + "---\n" + params[:post][:content]
+      File.open(new_file, 'w') { |file| file.write(writeable_content)}
+
+      new_klass = publish ? Jekyll::Post : Jekyll::Draft
+      new_post = new_klass.new(jekyll_site, jekyll_site.source, '', new_filename)
+
+      STDERR.puts "existing file: #{existing_file} new #{new_file}  #{new_post.inspect}"
+
+
+      # Stage the file for commit
+      if existing_file
+        existing_path = File.join(jekyll_site.source, existing_file)
+        if !File.identical?(existing_path, new_file)
+          STDERR.puts "existing file changed: #{existing_path} to #{new_file}"
+          repo.remove existing_path
+        else
+          STDERR.puts "same: #{existing_path} #{new_file}"
+        end
+        log_message = "Changed #{new_filename}"
+      else
+        log_message = "Created #{new_filename}"
+      end
+      repo.add new_file
       data = repo.commit_index log_message
 
       if params[:ajax]
-        {:status => 'OK'}.to_json
+        {
+          :status => 'OK',
+          :newname => new_post.name,
+          :newpath => new_post.relative_path[/^\/?(.*)/, 1] # Normalizing. Some Jekyll versions return /_drafts/ for drafts, but _posts/ for posts
+        }.to_json
       else
-        redirect @base_url + '/edit/' + filename
+        redirect @base_url + '/edit/' + new_filename
       end
     end
 

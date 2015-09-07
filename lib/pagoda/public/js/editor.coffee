@@ -24,22 +24,6 @@ $(document).ready ->
       $('#save-button').removeClass('post-saving')
       setTimeout((->set_save_button('saved')),2000)
 
-  draft_post = ->
-    $('#draft-action').addClass('selected')
-    $('#publish-action').removeClass('selected')
-    $('.override-select').removeClass('override-select')
-    $('[name="yaml_value[published]"]').val("false")
-    save_post()
-    false
-
-  publish_post = ->
-    $('#draft-action').removeClass('selected')
-    $('#publish-action').addClass('selected')
-    $('.override-select').removeClass('override-select')
-    $('[name="yaml_value[published]"]').val("true")
-    save_post()
-    false
-
 
   # Save post
   save_post = ->
@@ -50,7 +34,7 @@ $(document).ready ->
       post : 
         title   : $('#post-title').val()
         content : $('#post-content').val()
-        name    : $('#post_name').val()
+        name    : $('#post-name').val()
         yaml    : yaml_hash()
 
       ajax    : true
@@ -58,6 +42,8 @@ $(document).ready ->
     $.post(baseUrl + '/save-post', post_obj, (data)->
       response = $.parseJSON(data)
       if response['status'] == 'OK'
+        $('#post-name').val(response['newpath']);
+        history.replaceState(null, '', response['newname'])
         setTimeout((->set_save_button('saved')),1000)
       else
         set_save_button('error')
@@ -153,8 +139,6 @@ $(document).ready ->
         false
       )
 
-      $('#draft-action').click(draft_post)
-      $('#publish-action').click(publish_post)
       $('.add-yaml-entry').click(add_yaml_entry)
       $('.yaml-block .button').click(toggle_yaml_table)
       $('.yaml-table-inner input').bind('keyup', yaml_table_set_data)
