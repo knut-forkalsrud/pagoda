@@ -1,15 +1,10 @@
 <body class="admin posts">
   <div id="admin">
-    <ul style="list-style-type: none;">
+    <ul style="list-style-type: none; padding-bottom: 60px;">
       {{#images}}
         <li><img src="/img/{{.}}" style="max-height: 100px; margin-right: 40px;"> ../images/{{.}}</li>
       {{/images}}
     </ul>
-
-    <form accept-charset="UTF-8" action="{{base_url}}/images/upload" enctype="multipart/form-data" method="post">
-      <input name="file" type="file" />
-      <input type="submit" value="Upload" />
-    </form>
 
       <div id="publish-bar-hover">
         <div id="publish-bar">
@@ -17,6 +12,10 @@
             <div class="left">
               <a href="{{base_url}}/">&laquo; Admin</a>
             </div>
+<div class="right"><form accept-charset="UTF-8" action="{{base_url}}/images/upload" enctype="multipart/form-data" method="post">
+      <input name="file" type="file" />
+      <input type="submit" value="Upload" />
+    </form></div>
           </div>
         </div>
       </div>
